@@ -95,8 +95,8 @@ const navData = {
       url: "#",
       icon: Edit,
       items: [
-        { title: "Blog", url: "/auther/blog" },
-        { title: "My All Blog", url: "/auther/all-blog" },
+        { title: "Write a Blog", url: "/auther/create-blog" },
+        { title: "All Blog", url: "/auther/blog" },
        
       ],
     },
