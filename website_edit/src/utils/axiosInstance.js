@@ -1,12 +1,11 @@
 // src/api/AxiosInstance.js
 import axios from 'axios';
-
+ 
 const AxiosInstance = axios.create({
-  baseURL: "192.168.0.105:8003/api",  // Use environment variable for base URL
-
+  baseURL: "http://192.168.0.105:8003/api",  // Use environment variable for base URL
+ 
 });
-
-
+ 
 // Intercept requests if needed (for token or authentication)
 AxiosInstance.interceptors.request.use(
   (config) => {
@@ -18,7 +17,7 @@ AxiosInstance.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
+ 
 // Intercept responses to handle errors globally
 AxiosInstance.interceptors.response.use(
   (response) => response,
@@ -32,5 +31,5 @@ AxiosInstance.interceptors.response.use(
     }
   }
 );
-
+ 
 export default AxiosInstance;

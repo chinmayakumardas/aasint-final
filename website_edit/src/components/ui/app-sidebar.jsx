@@ -5,7 +5,7 @@ import Link from "next/link";
 import * as React from "react";
 import {
   Grid, Bell, Users, FileText, Edit,
-  BookOpen,
+  BookOpen,Briefcase,
   Bot,
   Command,
   Settings2,
@@ -32,27 +32,19 @@ const navData = {
       icon: Grid,
       isActive: true,
     },
-    {
-      title: "Notification",
-      url: "/admin/notification",
-      icon: Bell,
-      
-    
-    },
+  
     {
       title: "Services",
       url: "/admin/services",
-      icon: Grid,
+      icon: Briefcase,
       isActive: true,
     },
     {
       title: "User",
       url: "#",
       icon: Users,
-      items: [
-        { title: "All Users", url: "/admin/user" },
-        { title: "Registration", url: "/admin/registration" },
-      ],
+      url: "/admin/user" ,
+   
     },
   
     {
@@ -77,29 +69,14 @@ const navData = {
   ],
   auther: [
     {
-      title: "Dashboard",
-      url: "/auther",
-      icon: Grid,
+      title: "Blog",
+      url: "/auther/blog",
+      icon: Edit,
       isActive: true,
     },
     
-    {
-      title: "Notification",
-      url: "/auther/notification",
-      icon: Bell,
-      
    
-    },
-    {
-      title: "Blog",
-      url: "#",
-      icon: Edit,
-      items: [
-        { title: "Write a Blog", url: "/auther/create-blog" },
-        { title: "All Blog", url: "/auther/blog" },
-       
-      ],
-    },
+  
 
    
     {

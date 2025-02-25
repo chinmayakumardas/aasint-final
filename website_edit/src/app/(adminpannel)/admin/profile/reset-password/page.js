@@ -1,93 +1,120 @@
-// pages/admin/reset-password.js
-'use client'
-import { useState } from 'react';
-import { Card } from "@/components/ui/card"; // Adjust as needed
-import { Button } from "@/components/ui/button"; // Adjust as needed
-import { Input } from "@/components/ui/input"; // Adjust as needed
+
+
+
+"use client";
+
+import React, { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { sendOtp, verifyOtp, resetPassword } from "@/redux/slices/authSlice";
+import { toast } from "react-toastify";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 
 const ResetPassword = () => {
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [otp, setOtp] = useState('');
-  const [isOtpSent, setIsOtpSent] = useState(false);
-  const [isOtpValidated, setIsOtpValidated] = useState(false);
+  const dispatch = useDispatch();
+  const { loading, otpSent, otpValidated, resetSuccess, error } = useSelector(
+    (state) => state.auth
+  );
 
-  const handleSendOtp = () => {
-    // Logic to send OTP goes here
-    console.log('OTP sent to the registered email/phone');
-    setIsOtpSent(true);
+  const [email, setEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+
+  const handleSendOtp = async () => {
+    if (!email) return toast.error("Please enter your email.");
+    dispatch(sendOtp(email))
+      .unwrap()
+      .then(() => toast.success("OTP sent successfully!"))
+      .catch((err) => toast.error(err));
   };
 
-  const handleValidateOtp = () => {
-    // Logic to validate OTP goes here
-    if (otp === '123456') { // Example validation
-      console.log('OTP validated successfully');
-      setIsOtpValidated(true);
-    } else {
-      console.error('Invalid OTP');
-    }
+  const handleVerifyOtp = async () => {
+    if (!otp) return toast.error("Please enter the OTP.");
+    dispatch(verifyOtp({ email, otp }))
+      .unwrap()
+      .then(() => toast.success("OTP verified successfully!"))
+      .catch((err) => toast.error(err));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Logic to reset password goes here
-    console.log('Password changed successfully');
-    // Reset the form
-    setCurrentPassword('');
-    setNewPassword('');
-    setOtp('');
-    setIsOtpSent(false);
-    setIsOtpValidated(false);
+  const handleResetPassword = async () => {
+    if (!newPassword) return toast.error("Please enter a new password.");
+    dispatch(resetPassword({ email, otp, newPassword }))
+      .unwrap()
+      .then(() => toast.success("Password reset successfully!"))
+      .catch((err) => toast.error(err));
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Change Password</h1>
-      <Card className="p-4 shadow-lg">
-        {!isOtpValidated ? (
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="current-password" className="block mb-1">Current Password</label>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Reset Password</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {/* Email Input */}
+          <div className="mb-4">
+            <Label>Email</Label>
+            <Input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              disabled={otpSent}
+            />
+          </div>
+
+          {!otpSent && (
+            <Button onClick={handleSendOtp} disabled={loading} className="w-full">
+              {loading ? "Sending OTP..." : "Send OTP"}
+            </Button>
+          )}
+
+          {otpSent && !otpValidated && (
+            <div className="mt-4">
+              <Label>OTP</Label>
               <Input
-                type="password"
-                id="current-password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                required
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                placeholder="Enter OTP"
               />
+              <Button
+                onClick={handleVerifyOtp}
+                disabled={loading}
+                className="mt-2 w-full"
+              >
+                {loading ? "Verifying..." : "Verify OTP"}
+              </Button>
             </div>
-            <div className="mb-4">
-              <label htmlFor="new-password" className="block mb-1">New Password</label>
+          )}
+
+          {otpValidated && (
+            <div className="mt-4">
+              <Label>New Password</Label>
               <Input
                 type="password"
-                id="new-password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                required
+                placeholder="Enter new password"
               />
+              <Button
+                onClick={handleResetPassword}
+                disabled={loading}
+                className="mt-2 w-full"
+              >
+                {loading ? "Resetting..." : "Reset Password"}
+              </Button>
             </div>
-            {!isOtpSent ? (
-              <Button type="button" onClick={handleSendOtp}>Send OTP</Button>
-            ) : (
-              <div className="mb-4">
-                <label htmlFor="otp" className="block mb-1">Enter OTP</label>
-                <Input
-                  type="text"
-                  id="otp"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  required
-                />
-                <Button type="button" onClick={handleValidateOtp}>Validate OTP</Button>
-              </div>
-            )}
-            {isOtpValidated && (
-              <Button type="submit">Change Password</Button>
-            )}
-          </form>
-        ) : (
-          <div className="text-green-500">Password changed successfully!</div>
-        )}
+          )}
+
+          {resetSuccess && (
+            <p className="mt-4 text-green-600">Password reset successfully!</p>
+          )}
+
+          {error && <p className="mt-2 text-red-600">Error: {error}</p>}
+        </CardContent>
       </Card>
     </div>
   );

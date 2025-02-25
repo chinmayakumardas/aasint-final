@@ -7,8 +7,6 @@ const axiosInstance = axios.create({
 
 
 
-
-
 // Get all services
 export const getAllServices = async () => {
     const response = await axiosInstance.get("/getAllServices");

@@ -1,18 +1,13 @@
-// pages/register.js
-'use client'
+'use client';
 import { useState } from 'react';
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const RegisterPage = () => {
-  const [users, setUsers] = useState(() => {
-    // Initialize state with users from localStorage
-    return JSON.parse(localStorage.getItem('users')) || [];
-  });
-  
+  const [users, setUsers] = useState(() => JSON.parse(localStorage.getItem('users')) || []);
   const [formData, setFormData] = useState({
     email: '',
     username: '',
@@ -27,6 +22,10 @@ const RegisterPage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleRoleChange = (value) => {
+    setFormData((prev) => ({ ...prev, role: value }));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const newUser = { ...formData, active: true };
@@ -35,7 +34,6 @@ const RegisterPage = () => {
     setUsers(updatedUsers);
     localStorage.setItem('users', JSON.stringify(updatedUsers));
 
-    // Reset form
     setFormData({
       email: '',
       username: '',
@@ -61,9 +59,15 @@ const RegisterPage = () => {
           <Input name="mob" value={formData.mob} onChange={handleChange} required />
 
           <Label>Role</Label>
-          <Select name="role" value={formData.role} onChange={handleChange}>
-            <option value="author">Author</option>
-            <option value="editor">Editor</option>
+          <Select value={formData.role} onValueChange={handleRoleChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select Role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="author">Author</SelectItem>
+              <SelectItem value="editor">Editor</SelectItem>
+              <SelectItem value="admin">Admin</SelectItem>
+            </SelectContent>
           </Select>
 
           <Label>Date of Birth</Label>

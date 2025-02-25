@@ -36,15 +36,15 @@ export function NavMain({
                 </Link>
               </SidebarMenuButton>
               {item.items?.length ? (
-                <>
-                  <CollapsibleTrigger asChild>
+                <div className="flex">
+                  <CollapsibleTrigger asChild className="-mt-[1px]">
                     <SidebarMenuAction className="data-[state=open]:rotate-90">
                       <ChevronRight />
                       <span className="sr-only">Toggle</span>
                     </SidebarMenuAction>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <SidebarMenuSub>
+                    <SidebarMenuSub className='w-full'>
                       {item.items?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton asChild>
@@ -56,7 +56,7 @@ export function NavMain({
                       ))}
                     </SidebarMenuSub>
                   </CollapsibleContent>
-                </>
+                </div>
               ) : null}
             </SidebarMenuItem>
           </Collapsible>
