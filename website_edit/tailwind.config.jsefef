@@ -1,0 +1,13 @@
+// module.exports = {
+//   // ... other config
+//   theme: {
+//     extend: {
+//       transitionProperty: {
+//         'all': 'all',
+//       },
+//       backgroundImage: {
+//         'gradient-to-br': 'linear-gradient(to bottom right, var(--tw-gradient-stops))',
+//       },
+//     },
+//   },
+// } 
