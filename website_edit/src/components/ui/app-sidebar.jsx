@@ -34,14 +34,16 @@ const navData = {
     },
     {
       title: "Notification",
-      url: "#",
+      url: "/admin/notification",
       icon: Bell,
       
-      items: [
-        { title: "All Request", url: "/admin/request" },
-        { title: "Notification", url: "/admin/notification" },
-        
-      ],
+    
+    },
+    {
+      title: "Services",
+      url: "/admin/services",
+      icon: Grid,
+      isActive: true,
     },
     {
       title: "User",
@@ -76,32 +78,29 @@ const navData = {
   auther: [
     {
       title: "Dashboard",
-      url: "/admin",
+      url: "/auther",
       icon: Grid,
       isActive: true,
     },
+    
     {
       title: "Notification",
-      url: "#",
+      url: "/auther/notification",
       icon: Bell,
       
-      items: [
-        { title: "All Request", url: "/auther/request" },
-        { title: "Notification", url: "/auther/notification" },
-        
-      ],
+   
     },
     {
       title: "Blog",
       url: "#",
-      icon: Bell,
-      
+      icon: Edit,
       items: [
-        { title: "All Request", url: "/auther/blog" },
-        { title: "Notification", url: "/auther/notification" },
-        
+        { title: "Blog", url: "/auther/blog" },
+        { title: "My All Blog", url: "/auther/all-blog" },
+       
       ],
     },
+
    
     {
       title: "Settings",
@@ -114,55 +113,7 @@ const navData = {
       ],
     },
   ],
-  editor: [
-    {
-      title: "Dashboard",
-      url: "/editor",
-      icon: Grid,
-      isActive: true,
-    },
-    {
-      title: "Notification",
-      url: "#",
-      icon: Bell,
-      
-      items: [
-        { title: "All Request", url: "/editor/request" },
-        { title: "Notification", url: "/editor/notification" },
-        
-      ],
-    },
-    {
-      title: "Blog",
-      url: "#",
-      icon: Bell,
-      
-      items: [
-        { title: "All Request", url: "/editor/blog" },
-        { title: "Notification", url: "/editor/notification" },
-        
-      ],
-    },
-    {
-      title: "User",
-      url: "#",
-      icon: Users,
-      items: [
-        { title: "All Users", url: "/editor/user" },
-        { title: "Registration", url: "/editor/registration" },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        { title: "Profile", url: "/editor/profile" },
-        { title: "Password change", url: "/editor/profile/reset-password" },
-       
-      ],
-    },
-  ],
+
 };
 
 const userData = {
@@ -171,11 +122,7 @@ const userData = {
     email: "admin@example.com",
     avatar: "/avatars/admin.jpg",
   },
-  editor: {
-    name: "Editor",
-    email: "editor@example.com",
-    avatar: "/avatars/user.jpg",
-  },
+ 
   auther: {
     name: "Auther",
     email: "auther@example.com",
@@ -199,7 +146,7 @@ export function AppSidebar({ user }) {
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">AAS ONE</span>
+                  <span className="truncate font-semibold">AAS Infotech.</span>
                   <span className="truncate text-xs"></span>
                 </div>
               </a>
