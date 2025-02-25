@@ -5,10 +5,7 @@ const AxiosInstance = axios.create({
   baseURL: "http://192.168.0.203:8080/api",  // Use environment variable for base URL
 
 });
-const AxiosInstance2 = axios.create({
-  baseURL: "http://192.168.0.203:8080/api",  // Use environment variable for base URL
 
-});
 
 // Intercept requests if needed (for token or authentication)
 AxiosInstance.interceptors.request.use(
