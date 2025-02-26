@@ -1,71 +1,106 @@
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import {
+  getAllServicesApi,
+  getServiceByIdApi,
+  createServiceApi,
+  updateServiceApi,
+  deleteServiceApi,
+  updateServiceImageApi
+} from '@/api/serviceApi';
 
-
-
-
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { getAllServices, getServiceById, createService, updateService, deleteService } from "../../api/serviceApi";
-
-// Fetch all services
-export const fetchServices = createAsyncThunk("service/fetchAll", async () => {
-  const response = await getAllServices();
-  return response;
+// Async thunks
+export const fetchServices = createAsyncThunk('services/fetchAll', async (_, { rejectWithValue }) => {
+  try {
+    return await getAllServicesApi();
+  } catch (error) {
+    return rejectWithValue(error.message);
+  }
 });
 
-// Fetch single service by serviceId
-export const fetchServiceById = createAsyncThunk("service/fetchById", async (serviceId) => {
-  const response = await getServiceById(serviceId);
-  return response;
+export const fetchServiceById = createAsyncThunk('services/fetchById', async (serviceId, { rejectWithValue }) => {
+  try {
+    return await getServiceByIdApi(serviceId);
+  } catch (error) {
+    return rejectWithValue(error.message);
+  }
 });
 
-// Add new service
-export const addService = createAsyncThunk("service/add", async (serviceData) => {
-  const response = await createService(serviceData);
-  return response;
+export const createService = createAsyncThunk('services/create', async (serviceData, { rejectWithValue }) => {
+  try {
+    return await createServiceApi(serviceData);
+  } catch (error) {
+    return rejectWithValue(error.message);
+  }
 });
 
-// Edit service
-export const editService = createAsyncThunk("service/edit", async ({ serviceId, serviceData }) => {
-  const response = await updateService(serviceId, serviceData);
-  return response;
+export const updateService = createAsyncThunk('services/update', async ({ serviceId, updatedData }, { rejectWithValue }) => {
+  try {
+    return await updateServiceApi(serviceId, updatedData);
+  } catch (error) {
+    return rejectWithValue(error.message);
+  }
 });
 
-// Remove service
-export const removeService = createAsyncThunk("service/remove", async (serviceId) => {
-  await deleteService(serviceId);
-  return serviceId;
+export const deleteService = createAsyncThunk('services/delete', async (serviceId, { rejectWithValue }) => {
+  try {
+    return await deleteServiceApi(serviceId);
+  } catch (error) {
+    return rejectWithValue(error.message);
+  }
 });
 
-// Slice definition
+export const updateServiceImage = createAsyncThunk('services/updateImage', async ({ serviceId, imageIndex, imageFile }, { rejectWithValue }) => {
+  try {
+    return await updateServiceImageApi(serviceId, imageIndex, imageFile);
+  } catch (error) {
+    return rejectWithValue(error.message);
+  }
+});
+
+// Slice
 const serviceSlice = createSlice({
-  name: "service",
-  initialState: { services: [], loading: false, error: null },
+  name: 'service',
+  initialState: {
+    services: [],
+    selectedService: null,
+    status: 'idle',
+    error: null,
+  },
   reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchServices.pending, (state) => {
-        state.loading = true;
+        state.status = 'loading';
       })
       .addCase(fetchServices.fulfilled, (state, action) => {
-        state.loading = false;
+        state.status = 'succeeded';
         state.services = action.payload;
       })
       .addCase(fetchServices.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.error.message;
+        state.status = 'failed';
+        state.error = action.payload;
       })
-      .addCase(addService.fulfilled, (state, action) => {
+      .addCase(fetchServiceById.fulfilled, (state, action) => {
+        state.selectedService = action.payload;
+      })
+      .addCase(createService.fulfilled, (state, action) => {
         state.services.push(action.payload);
       })
-      .addCase(editService.fulfilled, (state, action) => {
-        const index = state.services.findIndex((service) => service.serviceId === action.payload.serviceId);
-        if (index !== -1) {
-          state.services[index] = action.payload;
-        }
+      .addCase(updateService.fulfilled, (state, action) => {
+        state.services = state.services.map(service =>
+          service.serviceId === action.payload.serviceId ? action.payload : service
+        );
       })
-      .addCase(removeService.fulfilled, (state, action) => {
-        state.services = state.services.filter((service) => service.serviceId !== action.payload);
+      .addCase(deleteService.fulfilled, (state, action) => {
+        state.services = state.services.filter(service => service.serviceId !== action.meta.arg);
+      })
+      .addCase(updateServiceImage.fulfilled, (state, action) => {
+        const index = state.services.findIndex(service => service.serviceId === action.payload.serviceId);
+        if (index !== -1) {
+          state.services[index].images = action.payload.images;
+        }
       });
-  },
+  }
 });
 
 export default serviceSlice.reducer;

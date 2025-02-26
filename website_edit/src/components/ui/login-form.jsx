@@ -41,7 +41,7 @@ export function LoginForm({ className, ...props }) {
     try {
       await verifyOtpApi(email, otp);
       toast.success('OTP validated successfully');
-      router.push('/admin'); // Redirect to dashboard
+      router.push('/dasboard'); // Redirect to dashboard
     } catch (error) {
       setErrorMessage(error.message);
       toast.error(error.message);

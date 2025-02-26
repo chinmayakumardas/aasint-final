@@ -2,7 +2,7 @@
 import { Card } from "@/components/ui/card"; // Your custom Card component
 import { Users, Bell, FileText, BookOpen } from 'lucide-react';
 
-const Dashboard = () => {
+const AutherDashboard = () => {
   const stats = [
     { title: 'Total Users', value: 120, icon: <Users className="text-3xl text-blue-600" /> },
     { title: 'Pending Notifications', value: 5, icon: <Bell className="text-3xl text-yellow-600" /> },
@@ -12,7 +12,7 @@ const Dashboard = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
+      <h1 className="text-2xl font-bold mb-6">Dashboard-Auther</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
           <Card key={stat.title} className="flex items-center p-4 shadow-lg">
@@ -28,6 +28,6 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default AutherDashboard;
 
 

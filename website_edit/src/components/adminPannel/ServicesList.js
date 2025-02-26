@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const Service = () => {
+const ServicesList = () => {
   const dispatch = useDispatch();
   const { services, loading, error } = useSelector((state) => state.service);
 
@@ -76,7 +76,7 @@ const Service = () => {
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Manage Services</h1>
-        <Button onClick={() => openModal()}>+ Create New Service</Button>
+        <Button variant="createBtn" onClick={() => openModal()}>+New Service</Button>
       </div>
 
       {loading && <p>Loading services...</p>}
@@ -102,8 +102,8 @@ const Service = () => {
                   />
 
               <div className="flex mt-4 space-x-2">
-                <Button size="sm" onClick={() => openModal(service)}>Edit</Button>
-                <Button size="sm" variant="destructive" onClick={() => handleDelete(service.serviceId)}>Delete</Button>
+                <Button variant="createBtn" size="sm" onClick={() => openModal(service)}>Edit</Button>
+                <Button variant="deleteBtn" size="sm"  onClick={() => handleDelete(service.serviceId)}>Delete</Button>
               </div>
             </CardContent>
           </Card>
@@ -171,7 +171,7 @@ const Service = () => {
 
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={closeModal}>Cancel</Button>
-              <Button onClick={handleSubmit}>{formData.serviceId ? "Update" : "Create"}</Button>
+              <Button variant="createBtn"  onClick={handleSubmit}>{formData.serviceId ? "Update" : "Create"}</Button>
             </div>
           </div>
         </DialogContent>
@@ -180,4 +180,4 @@ const Service = () => {
   );
 };
 
-export default Service;
+export default ServicesList;

@@ -1,4 +1,5 @@
-// pages/profile.js
+
+
 'use client'
 import { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea'; // Adjust based on actual imports
@@ -6,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-const ProfilePage = () => {
+const ProfileSettingForm = () => {
   const [username] = useState('shadcn');
   const [email, setEmail] = useState('');
   const [bio, setBio] = useState('I own a computer.');
@@ -76,4 +77,4 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage;
+export default ProfileSettingForm;

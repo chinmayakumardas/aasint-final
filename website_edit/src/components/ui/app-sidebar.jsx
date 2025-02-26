@@ -23,19 +23,20 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Breadcrumb } from "./breadcrumb";
 
 const navData = {
   admin: [
     {
       title: "Dashboard",
-      url: "/admin",
+      url: "/dashboard",
       icon: Grid,
       isActive: true,
     },
   
     {
       title: "Services",
-      url: "/admin/services",
+      url: "/all-services",
       icon: Briefcase,
       isActive: true,
     },
@@ -43,34 +44,33 @@ const navData = {
       title: "User",
       url: "#",
       icon: Users,
-      url: "/admin/user" ,
+      url: "/users" ,
    
     },
   
     {
       title: "Blog",
-      url: "#",
+      url: "/blogs",
       icon: Edit,
-      items: [
-        { title: "All Blog", url: "/admin/blog" },
-        { title: "Master", url: "/admin/blog/master" },
-      ],
+    
     },
     {
       title: "Settings",
-      url: "#",
+      url: "/settings/profile",
       icon: Settings2,
-      items: [
-        { title: "Profile", url: "/admin/profile" },
-        { title: "Password change", url: "/admin/profile/reset-password" },
-       
-      ],
+    
     },
   ],
   auther: [
     {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: Grid,
+      isActive: true,
+    },
+    {
       title: "Blog",
-      url: "/auther/blog",
+      url: "/blogs",
       icon: Edit,
       isActive: true,
     },
@@ -81,13 +81,9 @@ const navData = {
    
     {
       title: "Settings",
-      url: "#",
+      url: "/settings/profile",
       icon: Settings2,
-      items: [
-        { title: "Profile", url: "/admin/profile" },
-        { title: "Password change", url: "/admin/profile/reset-password" },
-       
-      ],
+    
     },
   ],
 
@@ -109,24 +105,26 @@ const userData = {
 
 export function AppSidebar({ user }) {
   const { role } = user;
-  const navItems = navData[role] || navData.guest;
-  const userInfo = userData[role] || userData.guest;
+  const navItems = navData[role] ;
+  const userInfo = userData[role] ;
 
   return (
     <Sidebar className="top-[--header-height] !h-[calc(100svh-var(--header-height))]">
       <SidebarHeader>
+       
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-            <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <Command className="size-4" />
-                </div>
+            <div >
+            <div className="flex aspect-square size-8 items-center justify-center rounded-lg  text-sidebar-primary-foreground">
+                <img src="/favicon.ico" alt="Company Logo" className="size-8" />
+              </div>
+
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">AAS Infotech.</span>
                   <span className="truncate text-xs"></span>
                 </div>
-              </a>
+              </div>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

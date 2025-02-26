@@ -15,19 +15,15 @@ const buttonVariants = cva(
           "bg-primary text-primary-foreground shadow hover:bg-primary/90 ",
     searchBtn:
           "bg-white text-primary-foreground  shadow hover:bg-primary/90 ",
-        moreBtn:
-          "bg-primary  text-primary-foreground shadow hover:bg-primary/90",
-        animatedBtn:
-          "bg-primary  text-primary-foreground shadow hover:bg-primary/90",
-      more:
-          "bg-primary text-primary-foreground shadow hover:bg-primary/90 transition-all duration-300 rounded-lg h-12",
-        destructive:
-          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
-        outline:
-          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+     createBtn:
+          "bg-blue-500  text-primary-foreground shadow hover:bg-blue-400",
+      deleteBtn:
+          "bg-red-500  text-primary-foreground shadow hover:bg-blue-400",
+      editBtn:
+          "bg-blue-400  text-primary-foreground shadow hover:bg-blue-400",
+      cancelBtn:
+          "bg-blue-400  text-primary-foreground shadow hover:bg-blue-400",
+      ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {

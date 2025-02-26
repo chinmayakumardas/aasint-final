@@ -1,46 +1,67 @@
-import axios from 'axios';
-
-const axiosInstance = axios.create({
-  baseURL: "http://192.168.0.105:8003/api",  // Use environment variable for base URL
-
-});
-
-
+import axiosInstance from '@/utils/axiosInstance';
 
 // Get all services
-export const getAllServices = async () => {
-    const response = await axiosInstance.get("/getAllServices");
+export const getAllServicesApi = async () => {
+  try {
+    const response = await axiosInstance.get('/services');
     return response.data;
+  } catch (error) {
+    throw new Error(error.response ? error.response.data.error : 'Failed to fetch services');
+  }
 };
 
-// Get service by ID
-export const getServiceById = async (serviceId) => {
-    const response = await axiosInstance.get(`/getservicesbyid/${serviceId}`);
+// Get a service by ID
+export const getServiceByIdApi = async (serviceId) => {
+  try {
+    const response = await axiosInstance.get(`/services/${serviceId}`);
     return response.data;
+  } catch (error) {
+    throw new Error(error.response ? error.response.data.error : 'Failed to fetch service');
+  }
 };
 
 // Create a new service
-export const createService = async (serviceData) => {
-    const response = await axiosInstance.post("/services", serviceData);
+export const createServiceApi = async (serviceData) => {
+  try {
+    const response = await axiosInstance.post('/services', serviceData);
     return response.data;
+  } catch (error) {
+    throw new Error(error.response ? error.response.data.error : 'Failed to create service');
+  }
 };
 
 // Update a service
-export const updateService = async (serviceId, serviceData) => {
-    const response = await axiosInstance.put(`/updateservices/${serviceId}`, serviceData);
+export const updateServiceApi = async (serviceId, updatedData) => {
+  try {
+    const response = await axiosInstance.put(`/services/${serviceId}`, updatedData);
     return response.data;
+  } catch (error) {
+    throw new Error(error.response ? error.response.data.error : 'Failed to update service');
+  }
 };
 
-// Soft delete a service
-export const deleteService = async (serviceId) => {
-    const response = await axiosInstance.delete(`/deleteservices/${serviceId}`);
+// Delete (soft delete) a service
+export const deleteServiceApi = async (serviceId) => {
+  try {
+    const response = await axiosInstance.delete(`/services/${serviceId}`);
     return response.data;
+  } catch (error) {
+    throw new Error(error.response ? error.response.data.error : 'Failed to delete service');
+  }
 };
 
-// Update a service image
-export const updateServiceImage = async (serviceId, imageIndex, formData) => {
-    const response = await axiosInstance.put(`/${serviceId}/updateimage/${imageIndex}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" }
+// Update service image
+export const updateServiceImageApi = async (serviceId, imageIndex, imageFile) => {
+  try {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+
+    const response = await axiosInstance.put(`/services/${serviceId}/update-image/${imageIndex}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
     });
+
     return response.data;
+  } catch (error) {
+    throw new Error(error.response ? error.response.data.error : 'Failed to update image');
+  }
 };
