@@ -3,7 +3,7 @@
 
 import { ToastContainer } from "react-toastify";
 import "./globals.css";
- 
+import '@mantine/tiptap/styles.css';
  
  
 export const metadata = {
