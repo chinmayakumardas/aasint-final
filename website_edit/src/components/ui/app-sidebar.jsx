@@ -38,7 +38,7 @@ const navData = {
       title: "Services",
       url: "/all-services",
       icon: Briefcase,
-      isActive: true,
+      
     },
     {
       title: "User",
@@ -66,13 +66,13 @@ const navData = {
       title: "Dashboard",
       url: "/dashboard",
       icon: Grid,
-      isActive: true,
+      
     },
     {
       title: "Blog",
       url: "/blogs",
       icon: Edit,
-      isActive: true,
+     
     },
     
    
@@ -104,9 +104,10 @@ const userData = {
 };
 
 export function AppSidebar({ user }) {
+  
   const { role } = user;
-  const navItems = navData[role] ;
-  const userInfo = userData[role] ;
+  const navItems = navData[role];
+  const userInfo = userData[role];
 
   return (
     <Sidebar className="top-[--header-height] !h-[calc(100svh-var(--header-height))]">

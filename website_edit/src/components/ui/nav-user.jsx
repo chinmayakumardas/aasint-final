@@ -30,23 +30,34 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
+import { useRouter } from 'next/navigation';
+
 export function NavUser({
   user
 }) {
+
+  
+  const router = useRouter();
   const { isMobile } = useSidebar()
 
+  // Correct the handleLogout function here
+  const handleLogout = () => {
+    localStorage.clear(); 
+    router.push('/login'); // Redirect to login page
+  };
+ 
   return (
-    (<SidebarMenu>
+    <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground">
-              <Avatar className="h-8 w-8 rounded-lg">
+              {/* <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
-              </Avatar>
+              </Avatar> */}
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">{user.name}</span>
                 <span className="truncate text-xs">{user.email}</span>
@@ -73,13 +84,18 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             
-            <DropdownMenuItem>
-              <LogOut />
+            {/* Attach onClick handler to DropdownMenuItem */}
+            <DropdownMenuItem 
+              onClick={handleLogout} 
+              className="cursor-pointer"
+            >
+              <LogOut className="mr-2" />
               Log out
             </DropdownMenuItem>
+
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
-    </SidebarMenu>)
+    </SidebarMenu>
   );
 }

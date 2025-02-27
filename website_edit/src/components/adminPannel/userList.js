@@ -1,3 +1,8 @@
+
+
+
+
+
 'use client';
 import { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
@@ -6,8 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllUsers, registerUser, updateUser } from '@/redux/slices/authSlice'; 
+import { getAllUsers, registerUser, editProfile } from '@/redux/slices/authSlice'; 
 import { toast } from 'react-toastify'; // Importing toastify
+import { FiEye, FiEyeOff } from 'react-icons/fi'; // Importing eye icons for toggle
 
 const UsersList = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,11 +21,15 @@ const UsersList = () => {
     username: '',
     email: '',
     role: '',
-    password: ''
+    password: '',
+    firstName: '',
+    lastName: '',
+    bio: ''
   });
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editIndex, setEditIndex] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false); // Register modal state
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // Edit modal state
+  const [editIndex, setEditIndex] = useState(null); // Index to track which user is being edited
+  const [showPassword, setShowPassword] = useState(false); // State to toggle password visibility
 
   const dispatch = useDispatch();
   
@@ -42,7 +52,7 @@ const UsersList = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.username || !formData.email || !formData.role || !formData.password) {
+    if (!formData.username || !formData.email || !formData.role || !formData.password || !formData.firstName || !formData.lastName || !formData.bio) {
       toast.error("Please fill in all fields");
       return;
     }
@@ -50,33 +60,54 @@ const UsersList = () => {
     dispatch(registerUser(formData))
       .then(() => {
         toast.success("User registered successfully!");
-        setFormData({ username: '', email: '', role: '', password: '' }); // Clear form after registration
+        setFormData({ username: '', email: '', role: '', password: '', firstName: '', lastName: '', bio: '' }); // Clear form after registration
         setIsDialogOpen(false);
       })
       .catch((err) => {
-        toast.error("Error registering user. Please try again.");
+        toast.error("Error registering user!");
       });
   };
 
   const handleEdit = (index) => {
     setEditIndex(index);
-    setFormData({ ...users[index] });
+    // Populate form data with existing user data except for fields like password or username
+    setFormData({ 
+     
+      username: users[index].username,
+      firstName: users[index].firstName,
+      lastName: users[index].lastName,
+      bio: users[index].bio,
+      role: users[index].role,
+    });
     setIsEditDialogOpen(true);
   };
 
   const handleUpdate = (e) => {
     e.preventDefault();
-    // Dispatch action to update the user data
-    dispatch(updateUser(editIndex, formData))
+    // Dispatch action to update the user data (do not include password for editing)
+    const updatedUser = {
+      username:formData.username,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      bio: formData.bio,
+      role: formData.role,
+    };
+  
+    dispatch(editProfile(updatedUser))
       .then(() => {
         toast.success("User updated successfully!");
-        setFormData({ username: '', email: '', role: '', password: '' }); // Clear form after update
+        setFormData({  role: '', firstName: '', lastName: '',username:'', bio: '' }); // Clear form after update
         setIsEditDialogOpen(false);
         setEditIndex(null);
       })
       .catch((err) => {
         toast.error("Error updating user. Please try again.");
       });
+  };
+  
+  const handleCreate = () => {
+    setFormData({ username: '', email: '', role: '', password: '', firstName: '', lastName: '', bio: '' });
+    setIsDialogOpen(true);
   };
 
   // Add a check for undefined or null `users`
@@ -95,48 +126,7 @@ const UsersList = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-1/2"
         />
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>Register New User</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Register New User</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="mt-4">
-              <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <Label>Email</Label>
-                  <Input name="email" value={formData.email} onChange={handleChange} required />
-                </div>
-
-                <div>
-                  <Label>Username</Label>
-                  <Input name="username" value={formData.username} onChange={handleChange} required />
-                </div>
-
-                <div>
-                  <Label>Role</Label>
-                  <Select value={formData.role} onValueChange={handleRoleChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="author">Author</SelectItem>
-                      <SelectItem value="admin">Admin</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label>Password</Label>
-                  <Input type="password" name="password" value={formData.password} onChange={handleChange} required />
-                </div>
-              </div>
-              <Button type="submit" className="mt-4 w-full">Register</Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button variant="createBtn" onClick={handleCreate}>Register</Button>
       </div>
 
       {/* User List as Cards */}
@@ -147,28 +137,28 @@ const UsersList = () => {
           filteredUsers.map((user, index) => (
             <div key={index} className="border p-4 rounded shadow">
               <p><strong>Username:</strong> {user.username}</p>
+              <p><strong>Full Name</strong> {user.firstName+" "+user.lastName}</p>
               <p><strong>Email:</strong> {user.email}</p>
               <p><strong>Role:</strong> {user.role}</p>
               <p><strong>Status:</strong> {user.active ? 'Active' : 'Inactive'}</p>
               <div className="mt-4 space-x-2">
-                <Button size="sm" onClick={() => handleEdit(index)}>Edit</Button>
-                {/* Removed the delete button */}
+                <Button variant="createBtn" size="sm" onClick={() => handleEdit(index)}>Edit</Button>
               </div>
             </div>
           ))
         )}
       </div>
 
-      {/* Edit User Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      {/* Register User Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-          {/* No need to add anything inside the trigger */}
+          {/* Button to open the Register modal */}
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
+            <DialogTitle>Register New User</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleUpdate} className="mt-4">
+          <form onSubmit={handleSubmit} className="mt-4">
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <Label>Email</Label>
@@ -177,7 +167,22 @@ const UsersList = () => {
 
               <div>
                 <Label>Username</Label>
-                <Input name="username" value={formData.username} onChange={handleChange} required disabled />
+                <Input name="username" value={formData.username} onChange={handleChange} required />
+              </div>
+
+              <div>
+                <Label>First Name</Label>
+                <Input name="firstName" value={formData.firstName} onChange={handleChange} required />
+              </div>
+
+              <div>
+                <Label>Last Name</Label>
+                <Input name="lastName" value={formData.lastName} onChange={handleChange} required />
+              </div>
+
+              <div>
+                <Label>Bio</Label>
+                <Input name="bio" value={formData.bio} onChange={handleChange} required />
               </div>
 
               <div>
@@ -187,23 +192,80 @@ const UsersList = () => {
                     <SelectValue placeholder="Select Role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="author">Author</SelectItem>
+                    <SelectItem value="auther">Auther</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div>
+              <div className="relative">
                 <Label>Password</Label>
-                <Input type="password" name="password" value={formData.password} onChange={handleChange} />
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+                >
+                  {showPassword ? <FiEyeOff /> : <FiEye />}
+                </button>
               </div>
             </div>
-            <Button type="submit" className="mt-4 w-full">Update</Button>
+            <Button variant="createBtn" type="submit" className="mt-4 ">Register</Button>
           </form>
         </DialogContent>
       </Dialog>
 
-    
+      {/* Edit User Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogTrigger asChild>
+          {/* No need for a trigger here */}
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleUpdate} className="mt-4">
+            <div className="grid grid-cols-1 gap-4">
+              
+
+              <div>
+                <Label>First Name</Label>
+                <Input name="firstName" value={formData.firstName} onChange={handleChange} required />
+              </div>
+
+              <div>
+                <Label>Last Name</Label>
+                <Input name="lastName" value={formData.lastName} onChange={handleChange} required />
+              </div>
+
+              <div>
+                <Label>Bio</Label>
+                <Input name="bio" value={formData.bio} onChange={handleChange} required />
+              </div>
+
+              <div>
+                <Label>Role</Label>
+                <Select value={formData.role} onValueChange={handleRoleChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="auther">Auther</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <Button variant="createBtn" type="submit" className="mt-4 ">Update</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

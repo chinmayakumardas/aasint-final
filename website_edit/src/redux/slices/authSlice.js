@@ -1,28 +1,31 @@
+
+
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { 
-  registerApi, 
-  loginApi, 
-  sendOtpApi, 
-  verifyOtpApi, 
-  resetPasswordApi, 
-  editProfileApi, 
-  getAllUsersApi 
+import {
+  registerApi,
+  loginApi,
+  sendOtpApi,
+  verifyOtpApi,
+  resetPasswordApi,
+  editProfileApi,
+  getAllUsersApi
 } from '@/api/authApi';  // Import your API calls
-
+ 
 // Async Thunks for API Calls
-
-export const registerUser = createAsyncThunk(
+ 
+//register
+ export const registerUser = createAsyncThunk(
   'auth/register',
-  async ({ username, email, password, role }, { rejectWithValue }) => {
+  async ({ username, email, password, role,firstName,lastName,bio }, { rejectWithValue }) => {
     try {
-      const response = await registerApi(username, email, password, role);
+      const response = await registerApi(username, email, password, role,firstName,lastName,bio);
       return response;
     } catch (error) {
       return rejectWithValue(error.message);
     }
   }
 );
-
+//login
 export const loginUser = createAsyncThunk(
   'auth/login',
   async ({ email, password }, { rejectWithValue }) => {
@@ -34,7 +37,7 @@ export const loginUser = createAsyncThunk(
     }
   }
 );
-
+ 
 export const sendOtp = createAsyncThunk(
   'auth/sendOtp',
   async (email, { rejectWithValue }) => {
@@ -46,7 +49,7 @@ export const sendOtp = createAsyncThunk(
     }
   }
 );
-
+ 
 export const verifyOtp = createAsyncThunk(
   'auth/verifyOtp',
   async ({ email, otp }, { rejectWithValue }) => {
@@ -58,7 +61,7 @@ export const verifyOtp = createAsyncThunk(
     }
   }
 );
-
+ 
 export const resetPassword = createAsyncThunk(
   'auth/resetPassword',
   async ({ email, otp, newPassword }, { rejectWithValue }) => {
@@ -70,12 +73,12 @@ export const resetPassword = createAsyncThunk(
     }
   }
 );
-
+ 
 export const editProfile = createAsyncThunk(
   'auth/editProfile',
-  async ({ firstName, lastName, bio }, { rejectWithValue }) => {
+  async ({ firstName, lastName, bio, username, role }, { rejectWithValue }) => {
     try {
-      const user = await editProfileApi(firstName, lastName, bio);
+      const user = await editProfileApi(firstName, lastName,username,  bio, role); // Removed password
       return user;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -83,7 +86,8 @@ export const editProfile = createAsyncThunk(
   }
 );
 
-export const getAllUsers = createAsyncThunk(
+
+ export const getAllUsers = createAsyncThunk(
   'auth/getAllUsers',
   async (_, { rejectWithValue }) => {
     try {
@@ -95,7 +99,6 @@ export const getAllUsers = createAsyncThunk(
     }
   }
 );
-
 // Initial State
 const initialState = {
   user: null,
@@ -107,7 +110,7 @@ const initialState = {
   message: null,
   users: []  // Ensure this is an array to store users
 };
-
+ 
 // Slice
 const authSlice = createSlice({
   name: 'auth',
@@ -120,8 +123,13 @@ const authSlice = createSlice({
       state.role = null;
       state.error = null;
       state.message = null;
+ 
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('role');
     },
-  },
+    },
+ 
   extraReducers: (builder) => {
     builder
       // Register User
@@ -137,7 +145,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
+ 
       // Login User
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
@@ -146,6 +154,7 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
         state.token = action.payload.token;
+        state.refreshToken = action.payload.refreshToken;
         state.role = action.payload.role;
         state.message = 'Login successful';
       })
@@ -153,7 +162,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
+ 
       // Send OTP
       .addCase(sendOtp.pending, (state) => {
         state.loading = true;
@@ -167,7 +176,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
+ 
       // Verify OTP
       .addCase(verifyOtp.pending, (state) => {
         state.loading = true;
@@ -179,12 +188,20 @@ const authSlice = createSlice({
         state.refreshToken = action.payload.refreshToken;
         state.role = action.payload.role;
         state.message = action.payload.message;
+        if (action.payload.token) {
+          localStorage.setItem('token', action.payload.token);
+        }
+        if (action.payload.refreshToken) {
+          localStorage.setItem('refreshToken', action.payload.refreshToken);
+        }
+        if (action.payload.role) {
+          localStorage.setItem('role', action.payload.role);
+        }
       })
       .addCase(verifyOtp.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-
       // Reset Password
       .addCase(resetPassword.pending, (state) => {
         state.loading = true;
@@ -198,7 +215,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
+ 
       // Edit Profile
       .addCase(editProfile.pending, (state) => {
         state.loading = true;
@@ -213,8 +230,8 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       })
-
-      // Get All Users
+ 
+     //Get All Users
       .addCase(getAllUsers.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -229,7 +246,7 @@ const authSlice = createSlice({
       });
   },
 });
-
+ 
 // Export Actions and Reducer
 export const { logout } = authSlice.actions;
 export default authSlice.reducer;

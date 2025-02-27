@@ -1,5 +1,6 @@
 
- 'use client';
+
+'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { cn } from "@/lib/utils";
@@ -7,242 +8,256 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from 'react-toastify'; // Import only the toast function
-
+import { toast } from 'react-toastify';
+import { loginApi, sendOtpApi, verifyOtpApi, resetPasswordApi } from '@/api/authApi';
+import { Eye, EyeOff } from "lucide-react";
+ 
 export function LoginForm({ className, ...props }) {
-  const [isForgotPassword, setIsForgotPassword] = useState(false);
-  const [isOtpSent, setIsOtpSent] = useState(false);
-  const [isOtpValidated, setIsOtpValidated] = useState(false);
+  const [step, setStep] = useState("login");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
-  const [password, setPassword] = useState(''); // To store password input for login
   const [errorMessage, setErrorMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+ 
   const router = useRouter();
-
-  const handleForgotPasswordClick = () => {
-    setIsForgotPassword(true);
-  };
-
-  const handleLogin = (e) => {
+  //const token = localStorage.getItem('token');
+ 
+  // Validation Regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+  const otpRegex = /^\d{6}$/;
+ 
+  // Handle Login
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Simulate login success, send OTP after credentials validation
-    if (email && password) {
-      setIsOtpSent(true); // Simulate OTP sent
+    if (!emailRegex.test(email)) {
+      toast.error("Invalid email format");
+      return;
+    }
+    if (!passwordRegex.test(password)) {
+      toast.error("Password must be at least 8 characters, include 1 uppercase letter and 1 special character");
+      return;
+    }
+ 
+    try {
+      const { token } = await loginApi(email, password);
+      setStep("otp");
       toast.success('OTP sent to your email');
-    } else {
-      setErrorMessage("Invalid credentials.");
-      toast.error('Invalid credentials');
+    } catch (error) {
+      setErrorMessage(error.message);
+      toast.error(error.message);
     }
   };
-
-  const handleResetPassword = () => {
-    setIsOtpSent(true); // Simulate OTP sent to email
-    toast.success('OTP sent to your email');
-  };
-
-  const handleOtpValidate = () => {
-    // Simulate OTP validation
-    if (otp === "123456") {
-      setIsOtpValidated(true);
-      toast.success('OTP validated successfully');
-      
-      if (!isForgotPassword) {
-        // If it's login flow, redirect to dashboard after OTP validation
-        router.push('/admin');
-        toast.success('Login successful');
-      }
-    } else {
-      setErrorMessage("Invalid OTP.");
-      toast.error('Invalid OTP');
+ 
+  // Handle OTP Verification
+  const handleOtpValidate = async () => {
+    if (!otpRegex.test(otp)) {
+      toast.error("OTP must be a 6-digit number");
+      return;
+    }
+ 
+    try {
+      await verifyOtpApi(email, otp);
+      // localStorage.setItem('token', token);
+      toast.success('Login successfully');
+      router.push('/dashboard');
+    } catch (error) {
+      setErrorMessage(error.message);
+      toast.error(error.message);
     }
   };
-
-  const handleSubmitNewPassword = () => {
-    if (newPassword === confirmPassword) {
-      // Simulate successful password reset
-      toast.success('Password reset successfully');
-      setTimeout(() => {
-        // After success, go back to login form and show toast for success
-        setIsForgotPassword(false); // Reset form state to login after success
-        setIsOtpSent(false); // Reset OTP sent state
-        setIsOtpValidated(false); // Reset OTP validated state
-        setEmail('');
-        setPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
-        toast.success('You can now log in with your new password!');
-      }, 2000); // Delay to allow toast to show
-    } else {
-      setErrorMessage('Passwords do not match.');
+ 
+  // Handle Forgot Password
+  const handleResetPassword = async () => {
+    if (!emailRegex.test(email)) {
+      toast.error("Invalid email format");
+      return;
+    }
+ 
+    try {
+      await sendOtpApi(email);
+      setStep("new-password");
+      toast.success('OTP sent to your email');
+    } catch (error) {
+      setErrorMessage(error.message);
+      toast.error(error.message);
+    }
+  };
+ 
+  // Handle New Password Submission
+  const handleSubmitNewPassword = async () => {
+    if (!otpRegex.test(otp)) {
+      toast.error("OTP must be a 6-digit number");
+      return;
+    }
+    if (!passwordRegex.test(newPassword)) {
+      toast.error("Password must be at least 8 characters, include 1 uppercase letter and 1 special character");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
       toast.error('Passwords do not match');
+      return;
+    }
+ 
+    try {
+      await resetPasswordApi(email, otp, newPassword);
+      toast.success('Password reset successful');
+      setStep("login");
+    } catch (error) {
+      setErrorMessage(error.message);
+      toast.error(error.message);
     }
   };
-
-  const handleSubmit = () => {
-    if (email && password) {
-      // Simulate successful login and redirect
-      toast.success('Login successful');
-      router.push('/admin'); // Redirect to dashboard after login
-    } else {
-      setErrorMessage("Invalid credentials.");
-      toast.error('Invalid credentials');
+  const handleOtpChange = (index, value) => {
+    if (!/^\d?$/.test(value)) return; // Allow only digits
+    const newOtp = otp.split("");
+    newOtp[index] = value;
+    setOtp(newOtp.join(""));
+ 
+    // Move to next field if a digit is entered
+    if (value && index < 5) {
+      document.getElementById(`otp-${index + 1}`).focus();
     }
   };
-
+ 
+  const handleOtpKeyDown = (index, e) => {
+    if (e.key === "Backspace" && !otp[index] && index > 0) {
+      document.getElementById(`otp-${index - 1}`).focus();
+    }
+  };
+ 
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData("text").trim().slice(0, 6);
+    if (/^\d{6}$/.test(pastedData)) {
+      setOtp(pastedData);
+    }
+  };
+ 
+ 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn("flex flex-col gap-4", className)} {...props}>
       <Card>
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl">Welcome back</CardTitle>
+        <CardHeader className="text-center mb-4">
+          <CardTitle className="text-3xl">
+            {step === "login" ? "Welcome Back !" : step === "otp" ? "Enter OTP" : "Reset Password"}
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin}>
+          {step === "login" && (
+            <form onSubmit={handleLogin} className="py-4">
+              <div className="grid gap-6">
+                <div className="grid gap-2">
+                  <Label htmlFor="email" className="text-lg">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="h-12 text-lg placeholder:text-lg"
+                   
+                  />
+                </div>
+ 
+                <div className="grid gap-2 relative">
+                  <Label htmlFor="password" className="text-lg">Password</Label>
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className="h-12 text-xl pr-10"
+                  />
+                  <div className="text-right">
+                    <a href="#" className="text-md underline text-black hover:text-black" onClick={() => setStep("reset")}>
+                      Forgot Password?
+                    </a>
+                  </div>
+                  <button
+                    type="button"
+                    className="absolute right-4 top-12 transform -translate-y-1/2 text-gray-600"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                  </button>
+                </div>
+ 
+                {errorMessage && <div className="text-red-500">{errorMessage}</div>}
+                <Button type="submit" className="w-full">Login</Button>
+              </div>
+            </form>
+          )}
+ 
+          {/* {step === "otp" && (
             <div className="grid gap-6">
-              {/* Google Login Button */}
-              <div className="flex flex-col gap-4">
-                <Button variant="outline" className="w-full">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <path
-                      d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  Login with Google
-                </Button>
+              <div className="grid gap-2">
+                <Label htmlFor="otp">Enter OTP</Label>
+                <Input id="otp" type="text" value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="Enter 6 digit OTP" required />
               </div>
-
-              {/* Continue with Email */}
-              <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-                <span className="relative z-10 bg-background px-2 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
-
-              {/* Login Form (Email + Password) */}
-              {!isForgotPassword && !isOtpSent && !isOtpValidated && (
-                <>
-                  <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="m@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <div className="flex items-center">
-                      <Label htmlFor="password">Password</Label>
-                      <a
-                        href="#"
-                        className="ml-auto text-sm underline-offset-4 hover:underline"
-                        onClick={handleForgotPasswordClick}
-                      >
-                        Forgot your password?
-                      </a>
-                    </div>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  {errorMessage && <div className="text-red-500">{errorMessage}</div>}
-                  <Button type="submit" className="w-full">
-                    Login
-                  </Button>
-                </>
-              )}
-
-              {/* Forgot Password Flow */}
-              {isForgotPassword && !isOtpSent && !isOtpValidated && (
-                <>
-                  <div className="grid gap-2">
-                    <Label htmlFor="forgot-email">Enter your email</Label>
-                    <Input
-                      id="forgot-email"
-                      type="email"
-                      placeholder="m@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button type="button" onClick={handleResetPassword} className="w-full">
-                    Reset Password
-                  </Button>
-                </>
-              )}
-
-              {/* OTP Validation Flow */}
-              {isOtpSent && !isOtpValidated && (
-                <>
-                  <div className="grid gap-2">
-                    <Label htmlFor="otp">Enter OTP</Label>
-                    <Input
-                      id="otp"
+              <Button type="button" onClick={handleOtpValidate} className="w-full">Validate OTP</Button>
+            </div> */}
+            {step === "otp" && (
+              <div className="flex flex-col items-center gap-10">
+              <Label htmlFor="otp" className="text-lg text-gray-600">
+                      OTP is sent to registered email
+              </Label>
+                <div className="flex space-x-2">
+                  {Array(6).fill("").map((_, index) => (
+                    <input
+                      key={index}
+                      id={`otp-${index}`}
                       type="text"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      placeholder="Enter 6 digit OTP"
-                      required
+                      maxLength="1"
+                      value={otp[index] || ""}
+                      onChange={(e) => handleOtpChange(index, e.target.value)}
+                      onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                      onPaste={handlePaste}
+                      className="w-12 h-12 border-b-2 border-gray-700 text-center text-2xl focus:outline-none focus:border-gray-900 transition-all"
                     />
-                  </div>
-                  <Button type="button" onClick={handleOtpValidate} className="w-full">
-                    Validate OTP
-                  </Button>
-                </>
-              )}
-
-              {/* New Password and Confirm Password Flow (Only for Forgot Password) */}
-              {isOtpValidated && isForgotPassword && (
-                <>
-                  <div className="grid gap-2">
-                    <Label htmlFor="new-password">New Password</Label>
-                    <Input
-                      id="new-password"
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="confirm-password">Confirm New Password</Label>
-                    <Input
-                      id="confirm-password"
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  {errorMessage && <div className="text-red-500">{errorMessage}</div>}
-                  <Button type="button" onClick={handleSubmitNewPassword} className="w-full">
-                    Submit New Password
-                  </Button>
-                </>
-              )}
+                  ))}
+                </div>
+                <Button type="button" onClick={handleOtpValidate} className="w-full mt-4">Validate OTP</Button>
+              </div>
+            )}
+           
+       
+ 
+          {step === "reset" && (
+            <div className="grid gap-6">
+              <div className="grid gap-2">
+                <Label htmlFor="reset-email" className="text-lg">Enter your email</Label>
+                <Input  className="h-12 text-lg pr-10 placeholder:text-lg" id="reset-email" type="email" placeholder="m@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              </div>
+              <Button type="button" onClick={handleResetPassword} className="w-full">Reset Password</Button>
             </div>
-          </form>
+          )}
+ 
+          {step === "new-password" && (
+            <div className="grid gap-6">
+              <div className="grid gap-2">
+                <Label htmlFor="otp">Enter OTP</Label>
+                <Input id="otp" type="text" value={otp} onChange={(e) => setOtp(e.target.value)} required />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="new-password">New Password</Label>
+                <Input id="new-password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="confirm-password">Confirm Password</Label>
+                <Input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+              </div>
+              <Button type="button" onClick={handleSubmitNewPassword} className="w-full">Submit</Button>
+            </div>
+          )}
         </CardContent>
       </Card>
-
-      {/* Footer Text */}
-      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 [&_a]:hover:text-primary">
-        By clicking continue, you agree to our <a href="/terms-of-policy">Terms of Service</a>{" "}
-        and <a href="/privacy-policy">Privacy Policy</a>.
-      </div>
     </div>
   );
 }
-
-
-
-
+ 
