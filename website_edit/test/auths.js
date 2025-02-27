@@ -6,8 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllUsers, registerUser, updateUser } from '@/redux/slices/authSlice'; 
-import { toast } from 'react-toastify'; // Importing toastify
+import { getAllUsers, deleteUser, registerUser, updateUser } from '@/redux/slices/authSlice'; // Import the necessary async thunks
 
 const UsersList = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -31,6 +30,11 @@ const UsersList = () => {
     dispatch(getAllUsers());
   }, [dispatch]);
 
+  const handleDelete = (userId) => {
+    // Dispatch a delete user action with the user's ID
+    dispatch(deleteUser(userId));
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -43,19 +47,13 @@ const UsersList = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.username || !formData.email || !formData.role || !formData.password) {
-      toast.error("Please fill in all fields");
+      alert("Please fill in all fields");
       return;
     }
     // Dispatch action to create a new user
-    dispatch(registerUser(formData))
-      .then(() => {
-        toast.success("User registered successfully!");
-        setFormData({ username: '', email: '', role: '', password: '' }); // Clear form after registration
-        setIsDialogOpen(false);
-      })
-      .catch((err) => {
-        toast.error("Error registering user. Please try again.");
-      });
+    dispatch(registerUser(formData));
+    setFormData({ username: '', email: '', role: '', password: '' });
+    setIsDialogOpen(false);
   };
 
   const handleEdit = (index) => {
@@ -67,16 +65,10 @@ const UsersList = () => {
   const handleUpdate = (e) => {
     e.preventDefault();
     // Dispatch action to update the user data
-    dispatch(updateUser(editIndex, formData))
-      .then(() => {
-        toast.success("User updated successfully!");
-        setFormData({ username: '', email: '', role: '', password: '' }); // Clear form after update
-        setIsEditDialogOpen(false);
-        setEditIndex(null);
-      })
-      .catch((err) => {
-        toast.error("Error updating user. Please try again.");
-      });
+    dispatch(updateUser(editIndex, formData));
+    setFormData({ username: '', email: '', role: '', password: '' });
+    setIsEditDialogOpen(false);
+    setEditIndex(null);
   };
 
   // Add a check for undefined or null `users`
@@ -152,7 +144,7 @@ const UsersList = () => {
               <p><strong>Status:</strong> {user.active ? 'Active' : 'Inactive'}</p>
               <div className="mt-4 space-x-2">
                 <Button size="sm" onClick={() => handleEdit(index)}>Edit</Button>
-                {/* Removed the delete button */}
+                <Button size="sm" variant="destructive" onClick={() => handleDelete(user.id)}>Delete</Button>
               </div>
             </div>
           ))
@@ -202,8 +194,6 @@ const UsersList = () => {
           </form>
         </DialogContent>
       </Dialog>
-
-    
     </div>
   );
 };

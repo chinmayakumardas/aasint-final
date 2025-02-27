@@ -15,8 +15,8 @@ export const registerUser = createAsyncThunk(
   'auth/register',
   async ({ username, email, password, role }, { rejectWithValue }) => {
     try {
-      const message = await registerApi(username, email, password, role);
-      return message;
+      const response = await registerApi(username, email, password, role);
+      return response;
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -87,9 +87,9 @@ export const getAllUsers = createAsyncThunk(
   'auth/getAllUsers',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await getAllUsersApi();
-      // Ensure the users data is an array
-      return Array.isArray(response.users) ? response.users : [];  // This guarantees the format
+      const users = await getAllUsersApi();
+      console.log(users)
+      return users; // Return the array of users directly
     } catch (error) {
       return rejectWithValue(error.message);
     }

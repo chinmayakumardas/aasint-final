@@ -4,7 +4,7 @@ import axiosInstance from '@/utils/axiosInstance';
 export const registerApi = async (username, email, password, role) => {
   try {
     const response = await axiosInstance.post('/register', { username, email, password, role });
-    return response.data.message;
+    return response;
   } catch (error) {
     throw new Error(error.response ? error.response.data.message : 'Registration failed');
   }
@@ -65,8 +65,11 @@ export const editProfileApi = async (firstName, lastName, bio) => {
 export const getAllUsersApi = async () => {
   try {
     const response = await axiosInstance.get('/users');
-    return response.data;
+    console.log("user list:", response.data); // Log the response for debugging purposes
+    // Make sure you return the correct part of the response data
+    return response.data|| []; // Assuming users are in response.data.users
   } catch (error) {
     throw new Error(error.response ? error.response.data.message : 'Failed to fetch users');
   }
 };
+
