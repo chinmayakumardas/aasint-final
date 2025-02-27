@@ -87,8 +87,9 @@ export const getAllUsers = createAsyncThunk(
   'auth/getAllUsers',
   async (_, { rejectWithValue }) => {
     try {
-      const users = await getAllUsersApi();
-      return users;
+      const response = await getAllUsersApi();
+      // Ensure the users data is an array
+      return Array.isArray(response.users) ? response.users : [];  // This guarantees the format
     } catch (error) {
       return rejectWithValue(error.message);
     }
@@ -104,6 +105,7 @@ const initialState = {
   loading: false,
   error: null,
   message: null,
+  users: []  // Ensure this is an array to store users
 };
 
 // Slice
@@ -219,7 +221,7 @@ const authSlice = createSlice({
       })
       .addCase(getAllUsers.fulfilled, (state, action) => {
         state.loading = false;
-        state.users = action.payload;
+        state.users = action.payload;  // Ensure we have an array here
       })
       .addCase(getAllUsers.rejected, (state, action) => {
         state.loading = false;

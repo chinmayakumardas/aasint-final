@@ -5,7 +5,7 @@ import {
   createServiceApi,
   updateServiceApi,
   deleteServiceApi,
-  updateServiceImageApi
+  updateServiceImageApi,downloadServiceImageApi
 } from '@/api/serviceApi';
 
 // Async thunks
@@ -56,6 +56,19 @@ export const updateServiceImage = createAsyncThunk('services/updateImage', async
     return rejectWithValue(error.message);
   }
 });
+// Async thunk to download the image
+export const downloadServiceImage = createAsyncThunk(
+  'services/downloadImage',
+  async ({ serviceId, imageIndex }, { rejectWithValue }) => {
+    try {
+      const imageData = await downloadServiceImageApi(serviceId, imageIndex);
+      return imageData; // Return the image data (could be used to trigger the download)
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 
 // Slice
 const serviceSlice = createSlice({
@@ -65,6 +78,8 @@ const serviceSlice = createSlice({
     selectedService: null,
     status: 'idle',
     error: null,
+    downloadedImage: null, // Store the downloaded image here if needed
+
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -99,7 +114,20 @@ const serviceSlice = createSlice({
         if (index !== -1) {
           state.services[index].images = action.payload.images;
         }
-      });
+      })
+      // Other cases...
+    .addCase(downloadServiceImage.pending, (state) => {
+      state.status = 'loading'; // Set loading state
+    })
+    .addCase(downloadServiceImage.fulfilled, (state, action) => {
+      state.status = 'succeeded';
+      // Optionally, store the downloaded image data in the state if needed
+      // state.downloadedImage = action.payload;
+    })
+    .addCase(downloadServiceImage.rejected, (state, action) => {
+      state.status = 'failed';
+      state.error = action.payload;
+    });
   }
 });
 

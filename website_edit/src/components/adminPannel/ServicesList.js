@@ -1,9 +1,8 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchServices, addService, editService, removeService } from "@/redux/slices/serviceSlice";
+import { fetchServices, updateService, deleteService, createService } from "@/redux/slices/serviceSlice";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const ServicesList = () => {
   const dispatch = useDispatch();
-  const { services, loading, error } = useSelector((state) => state.service);
+  const { services, status, error } = useSelector((state) => state.service);
 
   const [isModalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -25,7 +24,7 @@ const ServicesList = () => {
     description: "",
     images: null,
   });
-
+console.log(services)
   useEffect(() => {
     dispatch(fetchServices());
   }, [dispatch]);
@@ -58,9 +57,9 @@ const ServicesList = () => {
     if (formData.name && formData.title && formData.category && formData.description) {
       const serviceData = { ...formData };
       if (formData.serviceId) {
-        dispatch(editService({ serviceId: formData.serviceId, serviceData }));
+        dispatch(updateService({ serviceId: formData.serviceId, updatedData: serviceData }));
       } else {
-        dispatch(addService(serviceData));
+        dispatch(createService(serviceData));
       }
       closeModal();
     } else {
@@ -69,23 +68,21 @@ const ServicesList = () => {
   };
 
   const handleDelete = (serviceId) => {
-    dispatch(removeService(serviceId));
+    dispatch(deleteService(serviceId));
   };
 
   return (
     <div className="container mx-auto p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Manage Services</h1>
-        <Button variant="createBtn" onClick={() => openModal()}>+New Service</Button>
+        <Button variant="createBtn" onClick={() => openModal()}>+ New Service</Button>
       </div>
 
-      {loading && <p>Loading services...</p>}
+      {status === 'loading' && <p>Loading services...</p>}
       {error && <p className="text-red-500">{error}</p>}
-{ console.log(services)}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {services.map((service) => (
-
-          
           <Card key={service.serviceId}>
             <CardHeader>
               <CardTitle>{service.name}</CardTitle>
@@ -96,14 +93,14 @@ const ServicesList = () => {
               <p><strong>Description:</strong> {service.description}</p>
               
               <img 
-                    src={service.images[0]} 
-                    alt="Service" 
-                    className="mt-2 w-full h-32 object-cover rounded" 
-                  />
+                src={ service.images[0]} 
+                alt="Service" 
+                className="mt-2 w-full h-32 object-cover rounded" 
+              />
 
               <div className="flex mt-4 space-x-2">
                 <Button variant="createBtn" size="sm" onClick={() => openModal(service)}>Edit</Button>
-                <Button variant="deleteBtn" size="sm"  onClick={() => handleDelete(service.serviceId)}>Delete</Button>
+                <Button variant="deleteBtn" size="sm" onClick={() => handleDelete(service.serviceId)}>Delete</Button>
               </div>
             </CardContent>
           </Card>
@@ -171,7 +168,7 @@ const ServicesList = () => {
 
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={closeModal}>Cancel</Button>
-              <Button variant="createBtn"  onClick={handleSubmit}>{formData.serviceId ? "Update" : "Create"}</Button>
+              <Button variant="createBtn" onClick={handleSubmit}>{formData.serviceId ? "Update" : "Create"}</Button>
             </div>
           </div>
         </DialogContent>
