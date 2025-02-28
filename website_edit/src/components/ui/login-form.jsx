@@ -9,13 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from 'react-toastify';
-import { loginApi, sendOtpApi, verifyOtpApi, resetPasswordApi } from '@/api/authApi';
+import { loginApi, sendOtpApi, verifyOtpApi, resetPasswordApi,getUserDetails } from '@/api/authApi';
 import { Eye, EyeOff } from "lucide-react";
  
 export function LoginForm({ className, ...props }) {
   const [step, setStep] = useState("login");
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('chinmayakumardas2000@gmail.com');
+  const [password, setPassword] = useState('Chin@2000');
   const [otp, setOtp] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -63,6 +63,7 @@ export function LoginForm({ className, ...props }) {
       await verifyOtpApi(email, otp);
       // localStorage.setItem('token', token);
       toast.success('Login successfully');
+      
       router.push('/dashboard');
     } catch (error) {
       setErrorMessage(error.message);

@@ -8,7 +8,7 @@ import {
   verifyOtpApi,
   resetPasswordApi,
   editProfileApi,
-  getAllUsersApi
+  getAllUsersApi,getUserDataApi
 } from '@/api/authApi';  // Import your API calls
  
 // Async Thunks for API Calls
@@ -76,9 +76,9 @@ export const resetPassword = createAsyncThunk(
  
 export const editProfile = createAsyncThunk(
   'auth/editProfile',
-  async ({ firstName, lastName, bio, username, role }, { rejectWithValue }) => {
+  async ({ firstName, lastName,email, bio, role }, { rejectWithValue }) => {
     try {
-      const user = await editProfileApi(firstName, lastName,username,  bio, role); // Removed password
+      const user = await editProfileApi(firstName, lastName, email, bio, role); // Removed password
       return user;
     } catch (error) {
       return rejectWithValue(error.message);
@@ -99,12 +99,26 @@ export const editProfile = createAsyncThunk(
     }
   }
 );
+ export const getUserDetails = createAsyncThunk(
+  'auth/getUserDetails',
+  async (email, { rejectWithValue }) => {
+    try {
+      const userData = await getUserDataApi(email);
+      console.log(userData)
+      return userData; // Return the array of users directly
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
 // Initial State
 const initialState = {
   user: null,
+  userDetails:[],
   token: null,
   refreshToken: null,
   role: null,
+  email:null,
   loading: false,
   error: null,
   message: null,
@@ -121,12 +135,13 @@ const authSlice = createSlice({
       state.token = null;
       state.refreshToken = null;
       state.role = null;
+      state.email=null,
       state.error = null;
       state.message = null;
- 
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('role');
+     
+      localStorage.clear('');
+     
+  
     },
     },
  
@@ -156,6 +171,7 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.refreshToken = action.payload.refreshToken;
         state.role = action.payload.role;
+        state.email = action.payload.email;
         state.message = 'Login successful';
       })
       .addCase(loginUser.rejected, (state, action) => {
@@ -187,16 +203,11 @@ const authSlice = createSlice({
         state.token = action.payload.token;
         state.refreshToken = action.payload.refreshToken;
         state.role = action.payload.role;
+        state.email = action.payload.email;
         state.message = action.payload.message;
-        if (action.payload.token) {
-          localStorage.setItem('token', action.payload.token);
-        }
-        if (action.payload.refreshToken) {
-          localStorage.setItem('refreshToken', action.payload.refreshToken);
-        }
-        if (action.payload.role) {
-          localStorage.setItem('role', action.payload.role);
-        }
+      
+    
+    
       })
       .addCase(verifyOtp.rejected, (state, action) => {
         state.loading = false;
@@ -219,12 +230,12 @@ const authSlice = createSlice({
       // Edit Profile
       .addCase(editProfile.pending, (state) => {
         state.loading = true;
-        state.error = null;
+        //state.error = null;
       })
       .addCase(editProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
-        state.message = 'Profile updated successfully';
+        state.user = action.payload.user;
+        //state.message = 'Profile updated successfully';
       })
       .addCase(editProfile.rejected, (state, action) => {
         state.loading = false;
@@ -239,11 +250,28 @@ const authSlice = createSlice({
       .addCase(getAllUsers.fulfilled, (state, action) => {
         state.loading = false;
         state.users = action.payload;  // Ensure we have an array here
+        
       })
       .addCase(getAllUsers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+     //Get userDetails 
+      .addCase(getUserDetails.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getUserDetails.fulfilled, (state, action) => {
+        state.loading = false;
+        state.userDetails = action.payload;  // Ensure we have an array here
+        
+      })
+      .addCase(getUserDetails.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
+      
   },
 });
  

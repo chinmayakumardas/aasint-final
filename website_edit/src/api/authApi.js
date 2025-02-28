@@ -44,9 +44,10 @@ export const verifyOtpApi = async (email, otp) => {
     const response = await axiosInstance.post('/verify-otp', { email, otp });
     console.log('Verify OTP API Response:', response);
     localStorage.setItem('token', response.data.token);
+    localStorage.setItem('email', response.data.email);
     localStorage.setItem('refreshToken', response.data.refreshToken);
     localStorage.setItem('role', response.data.role);
-    return { message: response.data.message, token: response.data.token, refreshToken: response.data.refreshToken, role: response.data.role };
+    return { message: response.data.message, token: response.data.token, refreshToken: response.data.refreshToken, role: response.data.role, email: response.data.email };
   } catch (error) {
     console.error('Verify OTP API Error:', error.message);
     throw new Error(error.response ? error.response.data.message : 'Invalid OTP');
@@ -67,24 +68,13 @@ export const resetPasswordApi = async (email, otp, newPassword) => {
 
 
 // Edit Profile API call
-export const editProfileApi = async (firstName, lastName, bio, username, role) => {
+export const editProfileApi = async (firstName, lastName,email, bio, role) => {
   try {
-    const token = localStorage.getItem('token'); // Get the token from localStorage
-
-    // Check if token is available
-    if (!token) {
-      throw new Error('Authentication token not found');
-    }
-
+   
     // Include the Bearer token in the Authorization header
     const response = await axiosInstance.put(
       '/edit-profile',
-      { firstName, username, lastName, bio, role },
-      {
-        headers: {
-          Authorization: `Bearer ${token}` // Add Bearer token here
-        }
-      }
+      { firstName, lastName, bio,email, role }
     );
 
     console.log('Edit Profile API Response:', response);
@@ -95,7 +85,6 @@ export const editProfileApi = async (firstName, lastName, bio, username, role) =
   }
 };
 
-
 // Get All Users API call
 export const getAllUsersApi = async () => {
   try {
@@ -105,5 +94,16 @@ export const getAllUsersApi = async () => {
   } catch (error) {
     console.error('Get All Users API Error:', error.message);
     throw new Error(error.response ? error.response.data.message : 'Failed to fetch users');
+  }
+};
+// Get  Users API call
+export const getUserDataApi = async (email) => {
+  try {
+ const response = await axiosInstance.get(`/userdetails/${email}`);
+    console.log('Get user details API Response:', response);
+    return response; // Ensure users are fetched correctly
+  } catch (error) {
+    console.error('Get user details API Error:', error.message);
+    throw new Error(error.response ? error.response.data.message : 'Failed to fetch user details');
   }
 };
