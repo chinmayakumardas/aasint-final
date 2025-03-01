@@ -16,7 +16,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body
+      <body cz-shortcut-listen="true"
      
       ><ToastContainer position="top-right" autoClose={3000} hideProgressBar closeButton />
         {children}

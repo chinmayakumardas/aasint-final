@@ -23,7 +23,7 @@ export const updateBlogApi = async (blogId, blogData) => {
 // Get all blogs
 export const getAllBlogsApi = async () => {
   try {
-    const response = await axiosInstance.get("/blogs");
+    const response = await axiosInstance.get("/getallblogs");
     return response.data;
   } catch (error) {
     throw new Error(error.response ? error.response.data.message : "Failed to fetch blogs");

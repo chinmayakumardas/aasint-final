@@ -117,7 +117,7 @@ const navData = {
     { title: "Blog", url: "/blogs", icon: Edit },
     { title: "Settings", url: "/settings/profile", icon: Settings2 },
   ],
-  auther: [
+  author: [
     { title: "Dashboard", url: "/dashboard", icon: Grid },
     { title: "Blog", url: "/blogs", icon: Edit },
     { title: "Settings", url: "/settings/profile", icon: Settings2 },
@@ -142,10 +142,10 @@ export function AppSidebar() {
     }
   }, [userDetails]);
 
-  if (loading) return <p></p>;
-  if (!userData) return <p></p>;
+  if (loading) return null;
+  if (!userData) return null;
 
-  const role = userData?.role || "auther"; // Default to "auther" if role is not available
+  const role = userData?.role || "author"; // Default to "auther" if role is not available
   const navItems = navData[role];
 
   return (

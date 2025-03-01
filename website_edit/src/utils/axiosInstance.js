@@ -2,7 +2,7 @@
 import axios from 'axios';
  
 const AxiosInstance = axios.create({
-  baseURL: "http://192.168.0.105:8003/api",  // Use environment variable for base URL
+  baseURL: "http://192.168.0.117:8003/api",  // Use environment variable for base URL
  
 });
  
